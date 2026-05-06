@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Бриллианты моему бриллиантику</title>
+  <style>
+    :root {
+      --bg: #f6f1ea;
+      --card: rgba(255,255,255,0.78);
+      --text: #181311;
+      --muted: #756a5d;
+      --line: rgba(24,19,17,0.10);
+      --shadow: 0 20px 50px rgba(33, 23, 13, 0.10);
+      --radius: 28px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(211, 184, 132, 0.30), transparent 28%),
+        radial-gradient(circle at top right, rgba(145, 120, 84, 0.18), transparent 22%),
+        linear-gradient(180deg, #fbf8f4 0%, var(--bg) 100%);
+      color: var(--text);
+    }
+    .wrap {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 40px 20px 64px;
+    }
+    .hero {
+      padding: 26px 28px;
+      border: 1px solid var(--line);
+      border-radius: 34px;
+      background: rgba(255,255,255,0.62);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+      margin-bottom: 26px;
+    }
+    .hero h1 {
+      margin: 0;
+      font-size: clamp(34px, 5vw, 58px);
+      line-height: 1;
+      letter-spacing: -0.05em;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 18px;
+    }
+    @media (max-width: 1200px) {
+      .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 700px) {
+      .grid { grid-template-columns: 1fr; }
+      .wrap { padding-inline: 14px; }
+    }
+    .card {
+      overflow: hidden;
+      border-radius: var(--radius);
+      background: var(--card);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+    }
+    .media {
+      position: relative;
+      aspect-ratio: 4 / 3;
+      background: #f1ece5;
+      overflow: hidden;
+    }
+    .media img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      transform: scale(1.02);
+      transition: opacity .32s ease;
+    }
+    .media img.active { opacity: 1; }
+    .nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 3;
+      width: 38px;
+      height: 38px;
+      border-radius: 999px;
+      border: 1px solid rgba(0,0,0,0.08);
+      background: rgba(255,255,255,0.78);
+      color: #2d241c;
+      font-size: 24px;
+      line-height: 1;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      box-shadow: 0 10px 24px rgba(0,0,0,0.10);
+    }
+    .prev { left: 12px; }
+    .next { right: 12px; }
+    .dots {
+      position: absolute;
+      left: 50%;
+      bottom: 14px;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 6px;
+      z-index: 3;
+    }
+    .dots span {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.56);
+      border: 1px solid rgba(0,0,0,0.08);
+      opacity: 0.75;
+    }
+    .dots span.active {
+      width: 20px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.94);
+    }
+    .body {
+      padding: 18px 18px 20px;
+      display: grid;
+      gap: 10px;
+    }
+    h2 {
+      margin: 0;
+      font-size: 20px;
+      line-height: 1.2;
+      letter-spacing: -0.03em;
+    }
+    .meta {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .cta {
+      margin-top: 6px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      border-radius: 16px;
+      padding: 14px 16px;
+      text-decoration: none;
+      font-weight: 700;
+      color: #fff;
+      background: linear-gradient(135deg, #1d1814, #6b5430);
+      box-shadow: 0 10px 24px rgba(33, 24, 13, 0.18);
+    }
+    .cta:hover { filter: brightness(1.05); }
+  
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(10, 8, 6, 0.78);
+      backdrop-filter: blur(10px);
+      z-index: 9999;
+      padding: 24px;
+    }
+    .lightbox.open { display: flex; }
+    .lightbox img {
+      max-width: min(96vw, 1280px);
+      max-height: 90vh;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      border-radius: 24px;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.35);
+      background: #fff;
+    }
+    .lightbox .close {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      width: 62px;
+      height: 62px;
+      border: 0;
+      border-radius: 999px;
+      cursor: pointer;
+      color: #fff;
+      background: rgba(255,255,255,0.12);
+      font-size: 44px;
+      line-height: 1;
+      font-weight: 300;
+      display: grid;
+      place-items: center;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.45);
+    }
+    .lightbox .close:hover {
+      background: rgba(255,255,255,0.18);
+    }
+
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <h1>Бриллианты моему бриллиантику</h1>
+    </section>
+
+    <main class="grid">
+      
+      <article class="card" data-title="Моносерьга из белого золота 585 пробы с бриллиантами">
+        <div class="media">
+          <img src="https://alrosadiamond.ru/upload/previews/1170_1170_f938efc3f5dc466bce046a1cd0fc254b.jpg" alt="Моносерьга из белого золота 585 пробы с бриллиантами" class="zoomable">
+<img src="https://alrosadiamond.ru/upload/previews/1170_1170_4cae6c8c000184e8eec4a0b456c93568.jpg" alt="Моносерьга из белого золота 585 пробы с бриллиантами" class="zoomable">
+<img src="https://alrosadiamond.ru/upload/previews/1170_1170_9ace4fb4ec9de8e9b88e2937eba6a6ba.jpg" alt="Моносерьга из белого золота 585 пробы с бриллиантами" class="zoomable">
+<img src="https://alrosadiamond.ru/upload/previews/1170_1170_a68bd1124fa0288dc0cdb0a0506921aa.jpg" alt="Моносерьга из белого золота 585 пробы с бриллиантами" class="zoomable">
+          <button class="nav prev" type="button" aria-label="Предыдущее фото">‹</button>
+          <button class="nav next" type="button" aria-label="Следующее фото">›</button>
+          <div class="dots"><span></span><span></span><span></span><span></span></div>
+        </div>
+        <div class="body">
+          <h2>Моносерьга из белого золота 585 пробы с бриллиантами</h2>
+          <div class="meta">Коллекция Diamonds.Daily / АРТ. MM702H21</div>
+          <a class="cta" href="https://t.me/ivlmag33?text=%D0%AF%20%D0%B2%D1%8B%D0%B1%D1%80%D0%B0%D0%BB%D0%B0%20%D0%9C%D0%BE%D0%BD%D0%BE%D1%81%D0%B5%D1%80%D1%8C%D0%B3%D0%B0%20%D0%B8%D0%B7%20%D0%B1%D0%B5%D0%BB%D0%BE%D0%B3%D0%BE%20%D0%B7%D0%BE%D0%BB%D0%BE%D1%82%D0%B0%20585%20%D0%BF%D1%80%D0%BE%D0%B1%D1%8B%20%D1%81%20%D0%B1%D1%80%D0%B8%D0%BB%D0%BB%D0%B8%D0%B0%D0%BD%D1%82%D0%B0%D0%BC%D0%B8" target="_blank" rel="noopener">Отправить мужу</a>
+        </div>
+      </article>
+    
+      <article class="card" data-title="Серьги из белого золота 585 пробы с бриллиантами">
+        <div class="media">
+          <img src="https://alrosadiamond.ru/upload/previews/1170_1170_574e6379c95e531764c0e668b2cf8850.jpg" alt="Серьги из белого золота 585 пробы с бриллиантами" class="zoomable">
+<img src="https://alrosadiamond.ru/upload/previews/1170_1170_b930b19e4d5ae36e040eb887f327aaa3.jpg" alt="Серьги из белого золота 585 пробы с бриллиантами" class="zoomable">
+<img src="https://alrosadiamond.ru/upload/previews/1170_1170_25a10a9d08a7e540b4070189e6fdabb4.jpg" alt="Серьги из белого золота 585 пробы с бриллиантами" class="zoomable">
+<img src="https://alrosadiamond.ru/upload/previews/1170_1170_9c5c2685cfd73c8c13f8ec498e63c12e.jpg" alt="Серьги из белого золота 585 пробы с бриллиантами" class="zoomable">
+          <button class="nav prev" type="button" aria-label="Предыдущее фото">‹</button>
+          <button class="nav next" type="button" aria-label="Следующее фото">›</button>
+          <div class="dots"><span></span><span></span><span></span><span></span></div>
+        </div>
+        <div class="body">
+          <h2>Серьги из белого золота 585 пробы с бриллиантами</h2>
+          <div class="meta">Коллекция OHMY Diamonds / АРТ. 1P141H21</div>
+          <a class="cta" href="https://t.me/ivlmag33?text=%D0%AF%20%D0%B2%D1%8B%D0%B1%D1%80%D0%B0%D0%BB%D0%B0%20%D0%A1%D0%B5%D1%80%D1%8C%D0%B3%D0%B8%20%D0%B8%D0%B7%20%D0%B1%D0%B5%D0%BB%D0%BE%D0%B3%D0%BE%20%D0%B7%D0%BE%D0%BB%D0%BE%D1%82%D0%B0%20585%20%D0%BF%D1%80%D0%BE%D0%B1%D1%8B%20%D1%81%20%D0%B1%D1%80%D0%B8%D0%BB%D0%BB%D0%B8%D0%B0%D0%BD%D1%82%D0%B0%D0%BC%D0%B8" target="_blank" rel="noopener">Отправить мужу</a>
+        </div>
+      </article>
+    
+      <article class="card" data-title="Пусеты из белого золота 585 пробы с бриллиантами">
+        <div class="media">
+          <img src="https://alrosadiamond.ru/upload/previews/1170_1170_88abda77ad5f00049f8e9dcee6515b2f.jpg" alt="Пусеты из белого золота 585 пробы с бриллиантами" class="zoomable">
+<img src="https://alrosadiamond.ru/upload/previews/1170_1170_818ba1e719d5f6fad24b6a3d8c440390.jpg" alt="Пусеты из белого золота 585 пробы с бриллиантами" class="zoomable">
+<img src="https://alrosadiamond.ru/upload/previews/1170_1170_b0f1cd8afd63c913c3b1839253016734.jpg" alt="Пусеты из белого золота 585 пробы с бриллиантами" class="zoomable">
+<img src="https://alrosadiamond.ru/upload/previews/1170_1170_633d6226bfa590f2af1f92a4b83e1469.jpg" alt="Пусеты из белого золота 585 пробы с бриллиантами" class="zoomable">
+<img src="https://alrosadiamond.ru/upload/previews/1170_1170_abb7669d01febad34ea2b9259571715b.jpg" alt="Пусеты из белого золота 585 пробы с бриллиантами" class="zoomable">
+<img src="https://alrosadiamond.ru/upload/previews/2340_2340_44184bbbc23d7c5bde225d0735bc58c4.jpg" alt="Пусеты из белого золота 585 пробы с бриллиантами" class="zoomable">
+          <button class="nav prev" type="button" aria-label="Предыдущее фото">‹</button>
+          <button class="nav next" type="button" aria-label="Следующее фото">›</button>
+          <div class="dots"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        </div>
+        <div class="body">
+          <h2>Пусеты из белого золота 585 пробы с бриллиантами</h2>
+          <div class="meta">Коллекция PETALS / АРТ. 9P452E21</div>
+          <a class="cta" href="https://t.me/ivlmag33?text=%D0%AF%20%D0%B2%D1%8B%D0%B1%D1%80%D0%B0%D0%BB%D0%B0%20%D0%9F%D1%83%D1%81%D0%B5%D1%82%D1%8B%20%D0%B8%D0%B7%20%D0%B1%D0%B5%D0%BB%D0%BE%D0%B3%D0%BE%20%D0%B7%D0%BE%D0%BB%D0%BE%D1%82%D0%B0%20585%20%D0%BF%D1%80%D0%BE%D0%B1%D1%8B%20%D1%81%20%D0%B1%D1%80%D0%B8%D0%BB%D0%BB%D0%B8%D0%B0%D0%BD%D1%82%D0%B0%D0%BC%D0%B8" target="_blank" rel="noopener">Отправить мужу</a>
+        </div>
+      </article>
+    
+      <article class="card" data-title="Серьги из белого золота 585 пробы с бриллиантами">
+        <div class="media">
+          <img src="https://alrosadiamond.ru/upload/previews/1170_1170_556404d7fe913170ad4063a246aa19a1.jpg" alt="Серьги из белого золота 585 пробы с бриллиантами" class="zoomable">
+<img src="https://alrosadiamond.ru/upload/previews/1170_1170_4d210842e92a5d1f58541b8f6871fe62.jpg" alt="Серьги из белого золота 585 пробы с бриллиантами" class="zoomable">
+<img src="https://alrosadiamond.ru/upload/previews/1170_1170_51fc9095b06ded177775afbd0d48f827.jpg" alt="Серьги из белого золота 585 пробы с бриллиантами" class="zoomable">
+<img src="https://alrosadiamond.ru/upload/previews/1170_1170_87b338259e1eb5b014773510c5ff0d17.jpg" alt="Серьги из белого золота 585 пробы с бриллиантами" class="zoomable">
+          <button class="nav prev" type="button" aria-label="Предыдущее фото">‹</button>
+          <button class="nav next" type="button" aria-label="Следующее фото">›</button>
+          <div class="dots"><span></span><span></span><span></span><span></span></div>
+        </div>
+        <div class="body">
+          <h2>Серьги из белого золота 585 пробы с бриллиантами</h2>
+          <div class="meta">Коллекция Premium / АРТ. 1P405H21</div>
+          <a class="cta" href="https://t.me/ivlmag33?text=%D0%AF%20%D0%B2%D1%8B%D0%B1%D1%80%D0%B0%D0%BB%D0%B0%20%D0%A1%D0%B5%D1%80%D1%8C%D0%B3%D0%B8%20%D0%B8%D0%B7%20%D0%B1%D0%B5%D0%BB%D0%BE%D0%B3%D0%BE%20%D0%B7%D0%BE%D0%BB%D0%BE%D1%82%D0%B0%20585%20%D0%BF%D1%80%D0%BE%D0%B1%D1%8B%20%D1%81%20%D0%B1%D1%80%D0%B8%D0%BB%D0%BB%D0%B8%D0%B0%D0%BD%D1%82%D0%B0%D0%BC%D0%B8" target="_blank" rel="noopener">Отправить мужу</a>
+        </div>
+      </article>
+    
+      <article class="card" data-title="Серьги из белого золота 585 пробы с бриллиантами">
+        <div class="media">
+          <img src="https://alrosadiamond.ru/upload/previews/1170_1170_189c5cecef236bb51e2f2a87f141f721.jpg" alt="Серьги из белого золота 585 пробы с бриллиантами" class="zoomable">
+<img src="https://alrosadiamond.ru/upload/previews/1170_1170_4f709bc0ac6728534b09b6756e6dcdbd.jpg" alt="Серьги из белого золота 585 пробы с бриллиантами" class="zoomable">
+<img src="https://alrosadiamond.ru/upload/previews/1170_1170_dfb9972492dcbb752a5ced1ddfe9a1b5.jpg" alt="Серьги из белого золота 585 пробы с бриллиантами" class="zoomable">
+<img src="https://alrosadiamond.ru/upload/previews/1170_1170_ffca2cc7a1d7e41ac94670e7f724475a.jpg" alt="Серьги из белого золота 585 пробы с бриллиантами" class="zoomable">
+<img src="https://alrosadiamond.ru/upload/previews/1170_1170_044fb6f048d1c982d4b3efa9fdf66131.jpg" alt="Серьги из белого золота 585 пробы с бриллиантами" class="zoomable">
+<img src="https://alrosadiamond.ru/upload/previews/2340_2340_a80e2fcc2addcca80e47475da040f733.jpg" alt="Серьги из белого золота 585 пробы с бриллиантами" class="zoomable">
+          <button class="nav prev" type="button" aria-label="Предыдущее фото">‹</button>
+          <button class="nav next" type="button" aria-label="Следующее фото">›</button>
+          <div class="dots"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        </div>
+        <div class="body">
+          <h2>Серьги из белого золота 585 пробы с бриллиантами</h2>
+          <div class="meta">Коллекция PETALS / АРТ. 1P455H21</div>
+          <a class="cta" href="https://t.me/ivlmag33?text=%D0%AF%20%D0%B2%D1%8B%D0%B1%D1%80%D0%B0%D0%BB%D0%B0%20%D0%A1%D0%B5%D1%80%D1%8C%D0%B3%D0%B8%20%D0%B8%D0%B7%20%D0%B1%D0%B5%D0%BB%D0%BE%D0%B3%D0%BE%20%D0%B7%D0%BE%D0%BB%D0%BE%D1%82%D0%B0%20585%20%D0%BF%D1%80%D0%BE%D0%B1%D1%8B%20%D1%81%20%D0%B1%D1%80%D0%B8%D0%BB%D0%BB%D0%B8%D0%B0%D0%BD%D1%82%D0%B0%D0%BC%D0%B8" target="_blank" rel="noopener">Отправить мужу</a>
+        </div>
+      </article>
+    
+      <article class="card" data-title="Серьги из белого золота 585 пробы с бриллиантами">
+        <div class="media">
+          <img src="https://alrosadiamond.ru/upload/previews/1170_1170_5ff92755c992ac89943add3a5fd486ea.jpg" alt="Серьги из белого золота 585 пробы с бриллиантами" class="zoomable">
+<img src="https://alrosadiamond.ru/upload/previews/1170_1170_d6d6a2bffc3f0b1e241061554f616aba.jpg" alt="Серьги из белого золота 585 пробы с бриллиантами" class="zoomable">
+<img src="https://alrosadiamond.ru/upload/previews/1170_1170_26ecf52d79731de8043c565a499a23ba.jpg" alt="Серьги из белого золота 585 пробы с бриллиантами" class="zoomable">
+<img src="https://alrosadiamond.ru/upload/previews/1170_1170_f4187078fa46795703af7749f784d750.jpg" alt="Серьги из белого золота 585 пробы с бриллиантами" class="zoomable">
+          <button class="nav prev" type="button" aria-label="Предыдущее фото">‹</button>
+          <button class="nav next" type="button" aria-label="Следующее фото">›</button>
+          <div class="dots"><span></span><span></span><span></span><span></span></div>
+        </div>
+        <div class="body">
+          <h2>Серьги из белого золота 585 пробы с бриллиантами</h2>
+          <div class="meta">Коллекция Premium / АРТ. 1P413G21</div>
+          <a class="cta" href="https://t.me/ivlmag33?text=%D0%AF%20%D0%B2%D1%8B%D0%B1%D1%80%D0%B0%D0%BB%D0%B0%20%D0%A1%D0%B5%D1%80%D1%8C%D0%B3%D0%B8%20%D0%B8%D0%B7%20%D0%B1%D0%B5%D0%BB%D0%BE%D0%B3%D0%BE%20%D0%B7%D0%BE%D0%BB%D0%BE%D1%82%D0%B0%20585%20%D0%BF%D1%80%D0%BE%D0%B1%D1%8B%20%D1%81%20%D0%B1%D1%80%D0%B8%D0%BB%D0%BB%D0%B8%D0%B0%D0%BD%D1%82%D0%B0%D0%BC%D0%B8" target="_blank" rel="noopener">Отправить мужу</a>
+        </div>
+      </article>
+    
+      <article class="card" data-title="Пусеты из белого золота 585 пробы с бриллиантами">
+        <div class="media">
+          <img src="https://alrosadiamond.ru/upload/previews/1170_1170_7d165779160961b151609a98ade44955.jpg" alt="Пусеты из белого золота 585 пробы с бриллиантами" class="zoomable">
+<img src="https://alrosadiamond.ru/upload/previews/1170_1170_433d6ff8008297736ab7c2469f132104.jpg" alt="Пусеты из белого золота 585 пробы с бриллиантами" class="zoomable">
+<img src="https://alrosadiamond.ru/upload/previews/1170_1170_b62283bc81b101d1a2a9a5bf802d89be.jpg" alt="Пусеты из белого золота 585 пробы с бриллиантами" class="zoomable">
+<img src="https://alrosadiamond.ru/upload/previews/1170_1170_3a2f10c1a74d0b327a04fb064820a123.jpg" alt="Пусеты из белого золота 585 пробы с бриллиантами" class="zoomable">
+          <button class="nav prev" type="button" aria-label="Предыдущее фото">‹</button>
+          <button class="nav next" type="button" aria-label="Следующее фото">›</button>
+          <div class="dots"><span></span><span></span><span></span><span></span></div>
+        </div>
+        <div class="body">
+          <h2>Пусеты из белого золота 585 пробы с бриллиантами</h2>
+          <div class="meta">Коллекция Prestige / АРТ. 9E067121</div>
+          <a class="cta" href="https://t.me/ivlmag33?text=%D0%AF%20%D0%B2%D1%8B%D0%B1%D1%80%D0%B0%D0%BB%D0%B0%20%D0%9F%D1%83%D1%81%D0%B5%D1%82%D1%8B%20%D0%B8%D0%B7%20%D0%B1%D0%B5%D0%BB%D0%BE%D0%B3%D0%BE%20%D0%B7%D0%BE%D0%BB%D0%BE%D1%82%D0%B0%20585%20%D0%BF%D1%80%D0%BE%D0%B1%D1%8B%20%D1%81%20%D0%B1%D1%80%D0%B8%D0%BB%D0%BB%D0%B8%D0%B0%D0%BD%D1%82%D0%B0%D0%BC%D0%B8" target="_blank" rel="noopener">Отправить мужу</a>
+        </div>
+      </article>
+    
+      <article class="card" data-title="Пусеты из белого золота 585 пробы с бриллиантами">
+        <div class="media">
+          <img src="https://alrosadiamond.ru/upload/previews/1170_1170_6a7aae3bee7156bdb58ed5515e84e2c2.jpg" alt="Пусеты из белого золота 585 пробы с бриллиантами" class="zoomable">
+<img src="https://alrosadiamond.ru/upload/previews/1170_1170_0a6c4306b5062dd1265a52f6f106d263.jpg" alt="Пусеты из белого золота 585 пробы с бриллиантами" class="zoomable">
+<img src="https://alrosadiamond.ru/upload/previews/1170_1170_e4831219b781b1b759bc68d3b573a283.jpg" alt="Пусеты из белого золота 585 пробы с бриллиантами" class="zoomable">
+<img src="https://alrosadiamond.ru/upload/previews/1170_1170_0478171cd30f03185d632619b1adb179.jpg" alt="Пусеты из белого золота 585 пробы с бриллиантами" class="zoomable">
+          <button class="nav prev" type="button" aria-label="Предыдущее фото">‹</button>
+          <button class="nav next" type="button" aria-label="Следующее фото">›</button>
+          <div class="dots"><span></span><span></span><span></span><span></span></div>
+        </div>
+        <div class="body">
+          <h2>Пусеты из белого золота 585 пробы с бриллиантами</h2>
+          <div class="meta">Коллекция Premium / АРТ. 9P278E21</div>
+          <a class="cta" href="https://t.me/ivlmag33?text=%D0%AF%20%D0%B2%D1%8B%D0%B1%D1%80%D0%B0%D0%BB%D0%B0%20%D0%9F%D1%83%D1%81%D0%B5%D1%82%D1%8B%20%D0%B8%D0%B7%20%D0%B1%D0%B5%D0%BB%D0%BE%D0%B3%D0%BE%20%D0%B7%D0%BE%D0%BB%D0%BE%D1%82%D0%B0%20585%20%D0%BF%D1%80%D0%BE%D0%B1%D1%8B%20%D1%81%20%D0%B1%D1%80%D0%B8%D0%BB%D0%BB%D0%B8%D0%B0%D0%BD%D1%82%D0%B0%D0%BC%D0%B8" target="_blank" rel="noopener">Отправить мужу</a>
+        </div>
+      </article>
+    
+    </main>
+  </div>
+
+  
+
+
+
+  <div class="lightbox" id="lightbox" aria-hidden="true">
+    <button class="close" id="lightboxClose" type="button" aria-label="Закрыть">×</button>
+    <img id="lightboxImg" alt="">
+  </div>
+
+<script>
+  const lightbox = document.getElementById('lightbox');
+  const lightboxImg = document.getElementById('lightboxImg');
+  const lightboxClose = document.getElementById('lightboxClose');
+
+  function openLightbox(src, alt) {
+    lightboxImg.src = src;
+    lightboxImg.alt = alt || '';
+    lightbox.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeLightbox() {
+    lightbox.classList.remove('open');
+    lightboxImg.src = '';
+    document.body.style.overflow = '';
+  }
+
+  document.querySelectorAll('.card').forEach(card => {
+    const slides = [...card.querySelectorAll('.media img')];
+    const dots = [...card.querySelectorAll('.dots span')];
+    let current = 0;
+
+    function show(index) {
+      current = (index + slides.length) % slides.length;
+
+      slides.forEach((img, i) => {
+        img.classList.toggle('active', i === current);
+      });
+
+      dots.forEach((dot, i) => {
+        dot.classList.toggle('active', i === current);
+      });
+    }
+
+    show(0);
+
+    const prev = card.querySelector('.prev');
+    const next = card.querySelector('.next');
+
+    prev.addEventListener('click', (e) => {
+      e.stopPropagation();
+      show(current - 1);
+    });
+
+    next.addEventListener('click', (e) => {
+      e.stopPropagation();
+      show(current + 1);
+    });
+
+    slides.forEach(img => {
+      img.style.cursor = 'zoom-in';
+
+      img.addEventListener('click', () => {
+        openLightbox(img.src, img.alt);
+      });
+    });
+  });
+
+  lightboxClose.addEventListener('click', closeLightbox);
+
+  lightbox.addEventListener('click', (e) => {
+    if (e.target === lightbox) {
+      closeLightbox();
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeLightbox();
+    }
+  });
+</script>
+</body>
+</html>
